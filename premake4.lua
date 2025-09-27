@@ -45,10 +45,27 @@ solution "Openglad"
 	  excludes { "src/external/physfs/archivers/grp.c", "src/external/physfs/archivers/hog.c", "src/external/physfs/archivers/lzma.c", "src/external/physfs/archivers/mvl.c", "src/external/physfs/archivers/qpak.c", "src/external/physfs/archivers/wad.c", "src/external/physfs/extras/PhysDS.NET/**", "src/external/physfs/extras/physfs_rb/**", "src/external/physfs/extras/abs-file.h", "src/external/physfs/extras/globbing.c", "src/external/physfs/extras/globbing.h", "src/external/physfs/extras/ignorecase.c", "src/external/physfs/extras/ignorecase.h", "src/external/physfs/extras/physfshttpd.c", "src/external/physfs/extras/physfsunpack.c", "src/external/physfs/extras/selfextract.c" }
       --files { "src/external/physfs/archivers/dir.c", "src/external/physfs/archivers/zip.c", "src/external/physfs/extras/physfsrwops.*" }
 	  defines { "PHYSFS_SUPPORTS_ZIP" }
-	  buildoptions { "-std=gnu++0x" }
+	  --   buildoptions { "-std=gnu++0x" }
 	
 	  links { "SDL2main", "SDL2", "SDL2_mixer", "png" }
-	  includedirs { "src/external/**" }
+	  includedirs { "src/external/**", "/usr/local/include/SDL2", "/usr/local/include" }
+	  libdirs { "/usr/local/lib" }
+
+	  -- Add this for modern macOS code path in PhysFS (avoids MP* legacy code)
+      defines { "TARGET_API_MAC_OSX=1" }
+
+	  -- Add framework links for the required macOS APIs
+      links { "CoreFoundation.framework", "CoreServices.framework", "IOKit.framework" }
+
+	  -- Apply C-specific flags
+	--   filter "files:src/**.c"
+    --     language "C"
+    --     buildoptions { "-std=c99" } -- or -std=c11 if needed
+
+	  -- Apply C++-specific flags
+    --   filter "files:src/**.cpp"
+    --     language "C++"
+    --     buildoptions { "-std=c++11" } -- Replaces gnu++0x
  
       configuration "Debug"
          defines { "DEBUG" }

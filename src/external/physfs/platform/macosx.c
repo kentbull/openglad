@@ -11,12 +11,22 @@
 
 #ifdef PHYSFS_PLATFORM_MACOSX
 
-#include <Carbon/Carbon.h>
+// #include <Carbon/Carbon.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreFoundation/CFBundle.h>  // For CFBundleGetMainBundle, etc., in your patched function
+#include <CoreServices/CoreServices.h> // For FSRef definition
+#include <string.h>  // For memset
 #include <IOKit/storage/IOMedia.h>
 #include <IOKit/storage/IOCDMedia.h>
 #include <IOKit/storage/IODVDMedia.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
+
+#include <IOKit/IOKitLib.h>   // For IOObjectConformsTo, IOIteratorNext, IOMasterPort, etc.
+#include <IOKit/IOTypes.h>    // For kIOServicePlane, etc.
+#include <IOKit/IOReturn.h>   // For kIORegistryIterateRecursively, kIORegistryIterateParents, kern_return_t, etc.
+#include <stdlib.h>           // For realpath
+#include <pthread.h>          // For pthread_mutex_t, pthread_self, etc.
 
 /* Seems to get defined in some system header... */
 #ifdef Free
@@ -166,12 +176,13 @@ void __PHYSFS_platformDetectAvailableCDs(PHYSFS_StringCallback cb, void *data)
 {
     const char *devPrefix = "/dev/";
     const int prefixLen = strlen(devPrefix);
-    mach_port_t masterPort = 0;
+    // mach_port_t masterPort = 0;
+    mach_port_t masterPort = kIOMainPortDefault;
     struct statfs *mntbufp;
     int i, mounts;
 
-    if (IOMasterPort(MACH_PORT_NULL, &masterPort) != KERN_SUCCESS)
-        BAIL_MACRO(ERR_OS_ERROR, ) /*return void*/;
+    // if (IOMasterPort(MACH_PORT_NULL, &masterPort) != KERN_SUCCESS)
+    //     BAIL_MACRO(ERR_OS_ERROR, ) /*return void*/;
 
     mounts = getmntinfo(&mntbufp, MNT_WAIT);  /* NOT THREAD SAFE! */
     for (i = 0; i < mounts; i++)
@@ -217,101 +228,155 @@ static char *convertCFString(CFStringRef cfstr)
 } /* convertCFString */
 
 
+// char *__PHYSFS_platformCalcBaseDir(const char *argv0)
+// {
+//     ProcessSerialNumber psn = { 0, kCurrentProcess };
+//     struct stat statbuf;
+//     FSRef fsref;
+//     CFRange cfrange;
+//     CFURLRef cfurl = NULL;
+//     CFStringRef cfstr = NULL;
+//     CFMutableStringRef cfmutstr = NULL;
+//     char *retval = NULL;
+//     char *cstr = NULL;
+//     int rc = 0;
+
+//     BAIL_IF_MACRO(GetProcessBundleLocation(&psn, &fsref) != noErr, NULL, NULL);
+//     cfurl = CFURLCreateFromFSRef(cfallocator, &fsref);
+//     BAIL_IF_MACRO(cfurl == NULL, NULL, NULL);
+//     cfstr = CFURLCopyFileSystemPath(cfurl, kCFURLPOSIXPathStyle);
+//     CFRelease(cfurl);
+//     BAIL_IF_MACRO(cfstr == NULL, NULL, NULL);
+//     cfmutstr = CFStringCreateMutableCopy(cfallocator, 0, cfstr);
+//     CFRelease(cfstr);
+//     BAIL_IF_MACRO(cfmutstr == NULL, NULL, NULL);
+
+//     /* we have to decide if we got a binary's path, or the .app dir... */
+//     cstr = convertCFString(cfmutstr);
+//     if (cstr == NULL)
+//     {
+//         CFRelease(cfmutstr);
+//         return(NULL);
+//     } /* if */
+
+//     rc = stat(cstr, &statbuf);
+//     allocator.Free(cstr);  /* done with this. */
+//     if (rc == -1)
+//     {
+//         CFRelease(cfmutstr);
+//         return(NULL);  /* maybe default behaviour will work? */
+//     } /* if */
+
+//     if (S_ISREG(statbuf.st_mode))
+//     {
+//         /* Find last dirsep so we can chop the filename from the path. */
+//         cfrange = CFStringFind(cfmutstr, CFSTR("/"), kCFCompareBackwards);
+//         if (cfrange.location == kCFNotFound)
+//         {
+//             assert(0);  /* shouldn't ever hit this... */
+//             CFRelease(cfmutstr);
+//             return(NULL);
+//         } /* if */
+
+//         /* chop the "/exename" from the end of the path string... */
+//         cfrange.length = CFStringGetLength(cfmutstr) - cfrange.location;
+//         CFStringDelete(cfmutstr, cfrange);
+
+//         /* If we're an Application Bundle, chop everything but the base. */
+//         cfrange = CFStringFind(cfmutstr, CFSTR("/Contents/MacOS"),
+//                                kCFCompareCaseInsensitive |
+//                                kCFCompareBackwards |
+//                                kCFCompareAnchored);
+
+//         if (cfrange.location != kCFNotFound)
+//             CFStringDelete(cfmutstr, cfrange);  /* chop that, too. */
+//     } /* if */
+
+//     retval = convertCFString(cfmutstr);
+//     CFRelease(cfmutstr);
+
+//     return(retval);  /* whew. */
+// } /* __PHYSFS_platformCalcBaseDir */
+
 char *__PHYSFS_platformCalcBaseDir(const char *argv0)
 {
-    ProcessSerialNumber psn = { 0, kCurrentProcess };
-    struct stat statbuf;
-    FSRef fsref;
-    CFRange cfrange;
-    CFURLRef cfurl = NULL;
-    CFStringRef cfstr = NULL;
-    CFMutableStringRef cfmutstr = NULL;
     char *retval = NULL;
-    char *cstr = NULL;
-    int rc = 0;
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    if (bundle == NULL)
+        return NULL;
 
-    BAIL_IF_MACRO(GetProcessBundleLocation(&psn, &fsref) != noErr, NULL, NULL);
-    cfurl = CFURLCreateFromFSRef(cfallocator, &fsref);
-    BAIL_IF_MACRO(cfurl == NULL, NULL, NULL);
-    cfstr = CFURLCopyFileSystemPath(cfurl, kCFURLPOSIXPathStyle);
-    CFRelease(cfurl);
-    BAIL_IF_MACRO(cfstr == NULL, NULL, NULL);
-    cfmutstr = CFStringCreateMutableCopy(cfallocator, 0, cfstr);
-    CFRelease(cfstr);
-    BAIL_IF_MACRO(cfmutstr == NULL, NULL, NULL);
+    CFURLRef bundleURL = CFBundleCopyBundleURL(bundle);
+    if (bundleURL == NULL)
+        return NULL;
 
-    /* we have to decide if we got a binary's path, or the .app dir... */
-    cstr = convertCFString(cfmutstr);
-    if (cstr == NULL)
+    CFStringRef str = CFURLCopyFileSystemPath(bundleURL, kCFURLPOSIXPathStyle);
+    CFRelease(bundleURL);
+    if (str == NULL)
+        return NULL;
+
+    /* +2 so we have room for the null terminator _and_ a slash. */
+    const CFIndex len = CFStringGetLength(str);
+    const CFIndex size = CFStringGetMaximumSizeForEncoding(len, kCFStringEncodingUTF8) + 2;
+    retval = (char *) allocator.Malloc(size);
+    if (retval)
     {
-        CFRelease(cfmutstr);
-        return(NULL);
-    } /* if */
-
-    rc = stat(cstr, &statbuf);
-    allocator.Free(cstr);  /* done with this. */
-    if (rc == -1)
-    {
-        CFRelease(cfmutstr);
-        return(NULL);  /* maybe default behaviour will work? */
-    } /* if */
-
-    if (S_ISREG(statbuf.st_mode))
-    {
-        /* Find last dirsep so we can chop the filename from the path. */
-        cfrange = CFStringFind(cfmutstr, CFSTR("/"), kCFCompareBackwards);
-        if (cfrange.location == kCFNotFound)
+        if (CFStringGetCString(str, retval, size, kCFStringEncodingUTF8))
+            strcat(retval, "/");
+        else
         {
-            assert(0);  /* shouldn't ever hit this... */
-            CFRelease(cfmutstr);
-            return(NULL);
-        } /* if */
-
-        /* chop the "/exename" from the end of the path string... */
-        cfrange.length = CFStringGetLength(cfmutstr) - cfrange.location;
-        CFStringDelete(cfmutstr, cfrange);
-
-        /* If we're an Application Bundle, chop everything but the base. */
-        cfrange = CFStringFind(cfmutstr, CFSTR("/Contents/MacOS"),
-                               kCFCompareCaseInsensitive |
-                               kCFCompareBackwards |
-                               kCFCompareAnchored);
-
-        if (cfrange.location != kCFNotFound)
-            CFStringDelete(cfmutstr, cfrange);  /* chop that, too. */
+            allocator.Free(retval);
+            retval = NULL;
+        } /* else */
     } /* if */
 
-    retval = convertCFString(cfmutstr);
-    CFRelease(cfmutstr);
-
-    return(retval);  /* whew. */
+    CFRelease(str);
+    return retval;
 } /* __PHYSFS_platformCalcBaseDir */
 
 
 /* !!! FIXME */
 #define osxerr(x) x
 
+// char *__PHYSFS_platformRealPath(const char *path)
+// {
+//     /* The symlink and relative path resolving happens in FSPathMakeRef() */
+//     struct FSRef fsref;
+//     CFURLRef cfurl = NULL;
+//     CFStringRef cfstr = NULL;
+//     char *retval = NULL;
+//     OSStatus rc = osxerr(FSPathMakeRef((UInt8 *) path, &fsref, NULL));
+//     BAIL_IF_MACRO(rc != noErr, NULL, NULL);
+
+//     /* Now get it to spit out a full path. */
+//     cfurl = CFURLCreateFromFSRef(cfallocator, &fsref);
+//     BAIL_IF_MACRO(cfurl == NULL, ERR_OUT_OF_MEMORY, NULL);
+//     cfstr = CFURLCopyFileSystemPath(cfurl, kCFURLPOSIXPathStyle);
+//     CFRelease(cfurl);
+//     BAIL_IF_MACRO(cfstr == NULL, ERR_OUT_OF_MEMORY, NULL);
+//     retval = convertCFString(cfstr);
+//     CFRelease(cfstr);
+
+//     return(retval);
+// } /* __PHYSFS_platformRealPath */
+
 char *__PHYSFS_platformRealPath(const char *path)
 {
-    /* The symlink and relative path resolving happens in FSPathMakeRef() */
-    FSRef fsref;
-    CFURLRef cfurl = NULL;
-    CFStringRef cfstr = NULL;
-    char *retval = NULL;
-    OSStatus rc = osxerr(FSPathMakeRef((UInt8 *) path, &fsref, NULL));
-    BAIL_IF_MACRO(rc != noErr, NULL, NULL);
+    char *buf = realpath(path, NULL);
+    if (buf == NULL)
+        BAIL_MACRO(ERR_OS_ERROR, NULL);  // Use PhysFS error for OS failure (e.g., ENOENT)
 
-    /* Now get it to spit out a full path. */
-    cfurl = CFURLCreateFromFSRef(cfallocator, &fsref);
-    BAIL_IF_MACRO(cfurl == NULL, ERR_OUT_OF_MEMORY, NULL);
-    cfstr = CFURLCopyFileSystemPath(cfurl, kCFURLPOSIXPathStyle);
-    CFRelease(cfurl);
-    BAIL_IF_MACRO(cfstr == NULL, ERR_OUT_OF_MEMORY, NULL);
-    retval = convertCFString(cfstr);
-    CFRelease(cfstr);
+    size_t len = strlen(buf) + 1;
+    char *retval = (char *) allocator.Malloc(len);
+    if (retval == NULL)
+    {
+        allocator.Free(buf);
+        BAIL_MACRO(ERR_OUT_OF_MEMORY, NULL);
+    }
 
-    return(retval);
-} /* __PHYSFS_platformRealPath */
+    memcpy(retval, buf, len);  // Use memcpy to copy, as allocator may differ from system malloc
+    allocator.Free(buf);
+    return retval;
+}
 
 
 char *__PHYSFS_platformCurrentDir(void)
@@ -376,42 +441,71 @@ int __PHYSFS_platformSetDefaultAllocator(PHYSFS_Allocator *a)
 } /* __PHYSFS_platformSetDefaultAllocator */
 
 
+// void *__PHYSFS_platformGetThreadID(void)
+// {
+//     return( (void *) ((size_t) MPCurrentTaskID()) );
+// } /* __PHYSFS_platformGetThreadID */
 void *__PHYSFS_platformGetThreadID(void)
 {
-    return( (void *) ((size_t) MPCurrentTaskID()) );
-} /* __PHYSFS_platformGetThreadID */
+    return (void *) (uintptr_t) pthread_self();
+}
 
 
+// void *__PHYSFS_platformCreateMutex(void)
+// {
+//     MPCriticalRegionID m = NULL;
+//     if (osxerr(MPCreateCriticalRegion(&m)) != noErr)
+//         return NULL;
+//     return m;
+// } /* __PHYSFS_platformCreateMutex */
 void *__PHYSFS_platformCreateMutex(void)
 {
-    MPCriticalRegionID m = NULL;
-    if (osxerr(MPCreateCriticalRegion(&m)) != noErr)
-        return NULL;
+    pthread_mutex_t *m = (pthread_mutex_t *) allocator.Malloc(sizeof(pthread_mutex_t));
+    BAIL_IF_MACRO(m == NULL, ERR_OUT_OF_MEMORY, NULL);
+    if (pthread_mutex_init(m, NULL) != 0)
+    {
+        allocator.Free(m);
+        BAIL_MACRO(ERR_OS_ERROR, NULL);
+    }
     return m;
-} /* __PHYSFS_platformCreateMutex */
+}
 
 
+// void __PHYSFS_platformDestroyMutex(void *mutex)
+// {
+//     MPCriticalRegionID m = (MPCriticalRegionID) mutex;
+//     MPDeleteCriticalRegion(m);
+// } /* __PHYSFS_platformDestroyMutex */
 void __PHYSFS_platformDestroyMutex(void *mutex)
 {
-    MPCriticalRegionID m = (MPCriticalRegionID) mutex;
-    MPDeleteCriticalRegion(m);
-} /* __PHYSFS_platformDestroyMutex */
+    pthread_mutex_t *m = (pthread_mutex_t *) mutex;
+    pthread_mutex_destroy(m);
+    allocator.Free(m);
+}
 
 
+// int __PHYSFS_platformGrabMutex(void *mutex)
+// {
+//     MPCriticalRegionID m = (MPCriticalRegionID) mutex;
+//     if (MPEnterCriticalRegion(m, kDurationForever) != noErr)
+//         return(0);
+//     return(1);
+// } /* __PHYSFS_platformGrabMutex */
 int __PHYSFS_platformGrabMutex(void *mutex)
 {
-    MPCriticalRegionID m = (MPCriticalRegionID) mutex;
-    if (MPEnterCriticalRegion(m, kDurationForever) != noErr)
-        return(0);
-    return(1);
-} /* __PHYSFS_platformGrabMutex */
+    return (pthread_mutex_lock((pthread_mutex_t *) mutex) == 0);
+}
 
 
+// void __PHYSFS_platformReleaseMutex(void *mutex)
+// {
+//     MPCriticalRegionID m = (MPCriticalRegionID) mutex;
+//     MPExitCriticalRegion(m);
+// } /* __PHYSFS_platformReleaseMutex */
 void __PHYSFS_platformReleaseMutex(void *mutex)
 {
-    MPCriticalRegionID m = (MPCriticalRegionID) mutex;
-    MPExitCriticalRegion(m);
-} /* __PHYSFS_platformReleaseMutex */
+    pthread_mutex_unlock((pthread_mutex_t *) mutex);
+}
 
 #endif /* PHYSFS_PLATFORM_MACOSX */
 
