@@ -29,6 +29,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <limits.h>
+#include <unistd.h>
+#if defined(__APPLE__)
+#  include <TargetConditionals.h>
+#  include <CoreFoundation/CoreFoundation.h>
+#  include <mach-o/dyld.h>
+#  include <libgen.h>
+#endif
+
 #ifdef WIN32
 #include "windows.h"
 #include <shlobj.h>
@@ -106,36 +115,117 @@ std::string get_user_path()
 #endif
 }
 
+// std::string get_asset_path()
+// {
+// #ifdef ANDROID
+//     // RWops will look in the app's assets directory for this path
+//     return "";
+// #elif defined(__IPHONEOS__)
+//     // Assuming the cwd is set to the program's installation directory
+//     return "";
+// #elif defined(WIN32)
+//     // Assuming the cwd is set to the program's installation directory
+//     return "";
+// #else
+//     // Assumes UNIX with /proc
+//     char path[512];
+//     int maxPathSize = 512;
+//     memset(path, 0, maxPathSize);
+//     readlink("/proc/self/exe", path, maxPathSize);
+//     path[maxPathSize-1] = '\0';
+//     std::string s = path;
+//     size_t slash = s.find_last_of('/');
+//     if(slash != std::string::npos)
+//     {
+//         s = s.substr(0, slash);
+//     }
+//     s += '/';
+
+//     printf("get_asset_path: %s\n", s.c_str());
+//     return s;
+// #endif
+// }
 std::string get_asset_path()
 {
 #ifdef ANDROID
-    // RWops will look in the app's assets directory for this path
     return "";
 #elif defined(__IPHONEOS__)
-    // Assuming the cwd is set to the program's installation directory
     return "";
 #elif defined(WIN32)
-    // Assuming the cwd is set to the program's installation directory
     return "";
-#else
-    // Assumes UNIX with /proc
-    char path[512];
-    int maxPathSize = 512;
-    memset(path, 0, maxPathSize);
-    readlink("/proc/self/exe", path, maxPathSize);
-    path[maxPathSize-1] = '\0';
-    std::string s = path;
-    size_t slash = s.find_last_of('/');
-    if(slash != std::string::npos)
-    {
-        s = s.substr(0, slash);
-    }
-    s += '/';
+#elif defined(__APPLE__)
+    // macOS: prefer the app bundle’s Resources folder
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    if (bundle) {
+        // Try CFBundleCopyResourcesDirectoryURL first
+        CFURLRef resURL = CFBundleCopyResourcesDirectoryURL(bundle);
+        if (resURL) {
+            char buf[PATH_MAX];
+            if (CFURLGetFileSystemRepresentation(resURL, true, (UInt8*)buf, sizeof(buf))) {
+                CFRelease(resURL);
+                std::string s(buf);
+                if (s.empty() || s.back() != '/') s += '/';
+                printf("get_asset_path: %s\n", s.c_str());
+                return s;
+            }
+            CFRelease(resURL);
+        }
 
+        // Fallback: bundle URL + "Contents/Resources"
+        CFURLRef bunURL = CFBundleCopyBundleURL(bundle);
+        if (bunURL) {
+            CFURLRef res2 = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault, bunURL, CFSTR("Contents/Resources"), true);
+            CFRelease(bunURL);
+            if (res2) {
+                char buf[PATH_MAX];
+                if (CFURLGetFileSystemRepresentation(res2, true, (UInt8*)buf, sizeof(buf))) {
+                    CFRelease(res2);
+                    std::string s(buf);
+                    if (s.empty() || s.back() != '/') s += '/';
+                    printf("get_asset_path: %s\n", s.c_str());
+                    return s;
+                }
+                CFRelease(res2);
+            }
+        }
+    }
+
+    // Last-resort fallback: directory of the executable (useful for non-bundle debug runs)
+    {
+        char exe[PATH_MAX];
+        uint32_t sz = sizeof(exe);
+        if (_NSGetExecutablePath(exe, &sz) == 0) {
+            // dirname() may modify in-place
+            std::string path = exe;
+            std::vector<char> tmp(path.begin(), path.end());
+            tmp.push_back('\0');
+            std::string dir = ::dirname(tmp.data());
+            if (dir.empty() || dir.back() != '/') dir += '/';
+            printf("get_asset_path (fallback): %s\n", dir.c_str());
+            return dir;
+        }
+    }
+
+    // As a final fallback
+    printf("get_asset_path (final fallback): ./\n");
+    return "./";
+#else
+    // Linux/BSD: prefer /proc/self/exe if present
+    char path[PATH_MAX] = {0};
+    ssize_t n = readlink("/proc/self/exe", path, sizeof(path)-1);
+    std::string s;
+    if (n > 0) {
+        s.assign(path, n);
+        size_t slash = s.find_last_of('/');
+        if (slash != std::string::npos) s = s.substr(0, slash);
+    }
+    if (s.empty()) s = ".";
+    if (s.back() != '/') s += '/';
     printf("get_asset_path: %s\n", s.c_str());
     return s;
 #endif
 }
+
 
 SDL_RWops* open_read_file(const char* file, bool debug)
 {
