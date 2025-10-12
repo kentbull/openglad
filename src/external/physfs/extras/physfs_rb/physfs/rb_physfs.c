@@ -51,7 +51,7 @@ VALUE physfs_version (VALUE self)
 
     PHYSFS_getLinkedVersion (&ver);
 
-    sprintf (evalStr, "PhysicsFS::Version.new %d, %d, %d", 
+    snprintf(evalStr, sizeof(evalStr), "PhysicsFS::Version.new %d, %d, %d", 
 	     ver.major, ver.minor, ver.patch);
     return rb_eval_string (evalStr);
 }

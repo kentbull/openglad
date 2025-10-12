@@ -356,7 +356,7 @@ void draw_value_bar(short left, short top,
 	short bar_length=0;
 	short bar_remainder = totallength - bar_length;
 	short i, j;
-	char whatcolor;
+	unsigned char whatcolor;
 
 	if (mode == 0) // hitpoint bar
 	{
@@ -367,11 +367,11 @@ void draw_value_bar(short left, short top,
 		else if ( (points * 3) < control->stats->max_hitpoints)
 			whatcolor = LOW_HP_COLOR;
 		else if ( (points * 3 / 2) < control->stats->max_hitpoints)
-			whatcolor = MID_HP_COLOR;
+			whatcolor = (char)MID_HP_COLOR;
 		else if (points < control->stats->max_hitpoints)
 			whatcolor = HIGH_HP_COLOR;
 		else 
-			whatcolor = ORANGE_START;
+			whatcolor = (char)ORANGE_START;
 
 		if (points > control->stats->max_hitpoints)
 			bar_length = 60;
@@ -429,7 +429,7 @@ void draw_value_bar(short left, short top,
 		else if (points < control->stats->max_magicpoints)
 			whatcolor = HIGH_MP_COLOR;
 		else 
-			whatcolor = WATER_START;
+			whatcolor = (char)WATER_START;
 
 		if (points > control->stats->max_magicpoints)
 			bar_length = 60;
@@ -493,11 +493,11 @@ void new_draw_value_bar(short left, short top,
 		else if ( (points * 3) < control->stats->max_hitpoints)
 			whatcolor = LOW_HP_COLOR;
 		else if ( (points * 3 / 2) < control->stats->max_hitpoints)
-			whatcolor = MID_HP_COLOR;
+			whatcolor = (char)MID_HP_COLOR;
 		else if (points < control->stats->max_hitpoints)
 			whatcolor = HIGH_HP_COLOR;
 		else 
-			whatcolor = ORANGE_START;
+			whatcolor = (char)ORANGE_START;
 
 		if (points > control->stats->max_hitpoints)
 			bar_length = 60;
@@ -522,7 +522,7 @@ void new_draw_value_bar(short left, short top,
 		else if (points < control->stats->max_magicpoints)
 			whatcolor = HIGH_MP_COLOR;
 		else 
-			whatcolor = WATER_START;
+			whatcolor = (char)WATER_START;
 
 		if (points > control->stats->max_magicpoints)
 			bar_length = 60;
@@ -631,9 +631,9 @@ short new_score_panel(screen *myscreen, short do_it)
 				case PREF_LIFE_TEXT: // display numeric values only
 					if (draw_button)
 						myscreen->draw_button(lm+1, tm+10, lm+63, tm+26, 1, 1);
-					sprintf(message, "HP: %.0f", ceilf(control->stats->hitpoints));
+					snprintf(message, sizeof(message), "HP: %.0f", ceilf(control->stats->hitpoints));
 					mytext.write_xy(lm+5, tm+12, message, text_color, (short) 1); // to buffer
-					sprintf(message, "MP: %.0f", ceilf(control->stats->magicpoints));
+					snprintf(message, sizeof(message), "MP: %.0f", ceilf(control->stats->magicpoints));
 					mytext.write_xy(lm+5, tm+20, message, text_color, (short) 1);
 					break; // end of 'text' case
 				case PREF_LIFE_BARS: // display graphical bars only
@@ -651,13 +651,13 @@ short new_score_panel(screen *myscreen, short do_it)
 					//if (draw_button)
 					//  myscreen->draw_button(lm+1, tm+9, lm+63, tm+25, 1, 1);
 					new_draw_value_bar(lm+2, tm+10, control, 0, myscreen);
-					sprintf(message, "HP: %.0f", ceilf(control->stats->hitpoints));
+					snprintf(message, sizeof(message), "HP: %.0f", ceilf(control->stats->hitpoints));
 					mytext.write_xy(lm+5, tm+11, message, (unsigned char) BLACK, (short) 1); // to buffer
 
 					//SP BAR
 					//COLORS DEFINED IN GRAPH.H
 					new_draw_value_bar(lm+2, tm+18, control, 1, myscreen);
-					sprintf(message, "MP: %.0f", ceilf(control->stats->magicpoints));
+					snprintf(message, sizeof(message), "MP: %.0f", ceilf(control->stats->magicpoints));
 					mytext.write_xy(lm+5, tm+19, message, (unsigned char) BLACK, (short) 1);
 					break; // end of 'both' case
 			} // end of HP/MP display case
@@ -701,23 +701,23 @@ short new_score_panel(screen *myscreen, short do_it)
                 }
                 else
                 {
-                    sprintf(message, "SC: %u", scorecountup[control->team_num]);
+                    snprintf(message, sizeof(message), "SC: %u", scorecountup[control->team_num]);
                     mytext.write_xy(lm+2, bm-8, message, text_color, (short) 1);
 
                     // Level or exp, 2nd bottom left
                     if (control->myguy)
-                        sprintf(message, "XP: %u", control->myguy->exp);
+                        snprintf(message, sizeof(message), "XP: %u", control->myguy->exp);
                     else
-                        sprintf(message, "LEVEL: %i", control->stats->level);
+                        snprintf(message, sizeof(message), "LEVEL: %i", control->stats->level);
                     mytext.write_xy(lm+2, bm-16, message, text_color, (short) 1);
                 }
                 
 				// Currently-select special
 				if (control->shifter_down &&
 				        strcmp(myscreen->alternate_name[(int)control->query_family()][(int)control->current_special], "NONE") )
-					sprintf(message, "SPC: %s", myscreen->alternate_name[(int)control->query_family()][(int)control->current_special]);
+					snprintf(message, sizeof(message), "SPC: %s", myscreen->alternate_name[(int)control->query_family()][(int)control->current_special]);
 				else
-					sprintf(message, "SPC: %s", myscreen->special_name[(int)control->query_family()][(int)control->current_special]);
+					snprintf(message, sizeof(message), "SPC: %s", myscreen->special_name[(int)control->query_family()][(int)control->current_special]);
 					
                 
 				if (control->stats->magicpoints >= control->stats->special_cost[(int)control->current_special])
@@ -729,7 +729,7 @@ short new_score_panel(screen *myscreen, short do_it)
                 // Alternate special name (if not "NONE")
 				if (strcmp(myscreen->alternate_name[(int)control->query_family()][(int)control->current_special], "NONE") )
                 {
-					sprintf(message, "ALT: %s", myscreen->alternate_name[(int)control->query_family()][(int)control->current_special]);
+					snprintf(message, sizeof(message), "ALT: %s", myscreen->alternate_name[(int)control->query_family()][(int)control->current_special]);
                     if (control->stats->magicpoints >= control->stats->special_cost[(int)control->current_special])
                         mytext.write_xy(lm+2, bm + special_offset + 8, message, text_color, (short) 1);
                     else
@@ -761,7 +761,7 @@ short new_score_panel(screen *myscreen, short do_it)
 				if (draw_button)
 					myscreen->draw_button(rm-57, tm+1, rm-2, tm+16, 1, 1);
 
-				sprintf(message, "TEAM: %d", tempallies);
+				snprintf(message, sizeof(message), "TEAM: %d", tempallies);
 				#ifndef USE_TOUCH_INPUT
 				mytext.write_xy(rm - 55, tm+2, message, text_color, (short) 1);
 				#else
@@ -769,7 +769,7 @@ short new_score_panel(screen *myscreen, short do_it)
 				#endif
 
 				// Number of foes, 2nd upper right
-				sprintf(message, "FOES: %d", tempfoes);
+				snprintf(message, sizeof(message), "FOES: %d", tempfoes);
 				#ifndef USE_TOUCH_INPUT
 				mytext.write_xy(rm-55, tm+10, message, text_color, (short) 1);
 				#else

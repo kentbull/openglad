@@ -106,7 +106,7 @@ short treasure::eat_me(walker  * eater)
 				eater->flight_left += (150*stats->level);
 				if (eater->user != -1)
 				{
-					sprintf(message, "Potion of Flight(%d)!", stats->level);
+					snprintf(message, sizeof(message), "Potion of Flight(%d)!", stats->level);
 					myscreen->do_notify(message, eater);
 				}
 				dead = 1;
@@ -119,7 +119,7 @@ short treasure::eat_me(walker  * eater)
 			dead = 1;
 			if (eater->user != -1)
 			{
-				sprintf(message, "Potion of Mana(%d)!", stats->level);
+				snprintf(message, sizeof(message), "Potion of Mana(%d)!", stats->level);
 				myscreen->do_notify(message, eater);
 			}
 			return 1;
@@ -130,7 +130,7 @@ short treasure::eat_me(walker  * eater)
 				dead = 1;
 				if (eater->user != -1)
 				{
-					sprintf(message, "Potion of Invulnerability(%d)!", stats->level);
+					snprintf(message, sizeof(message), "Potion of Invulnerability(%d)!", stats->level);
 					myscreen->do_notify(message, eater);
 				}
 			}
@@ -139,7 +139,7 @@ short treasure::eat_me(walker  * eater)
 			eater->invisibility_left += (150*stats->level);
 			if (eater->user != -1)
 			{
-				sprintf(message, "Potion of Invisibility(%d)!", stats->level);
+				snprintf(message, sizeof(message), "Potion of Invisibility(%d)!", stats->level);
 				myscreen->do_notify(message, eater);
 			}
 			dead = 1;
@@ -149,7 +149,7 @@ short treasure::eat_me(walker  * eater)
 			eater->speed_bonus = stats->level;
 			if (eater->user != -1)
 			{
-				sprintf(message, "Potion of Speed(%d)!", stats->level);
+				snprintf(message, sizeof(message), "Potion of Speed(%d)!", stats->level);
 				myscreen->do_notify(message, eater);
 			}
 			dead = 1;
@@ -165,12 +165,12 @@ short treasure::eat_me(walker  * eater)
 			else
 				guys_here = 0;
 			// Get the name of our exit..
-			sprintf(message, "scen%d", stats->level);
+			snprintf(message, sizeof(message), "scen%d", stats->level);
 			strcpy(exitname, myscreen->get_scen_title(message, myscreen) );
 
 			//buffers: PORT: using strcmp instead of stricmp
 			if (!strcmp(exitname, "none"))
-				sprintf(exitname, "Level %d", stats->level);
+				snprintf(exitname, sizeof(exitname), "Level %d", stats->level);
 
 			leftside  = 160 - ( (strlen(exitname) + 18) * 3);
 			rightside = 160 + ( (strlen(exitname) + 18) * 3);
@@ -287,10 +287,10 @@ short treasure::eat_me(walker  * eater)
 			{
 				eater->keys |= (Sint32) (pow((double)2, stats->level)); // ie, 2, 4, 8, 16...
 				if (eater->myguy)
-					sprintf(message, "%s picks up key %d", eater->myguy->name,
+					snprintf(message, sizeof(message), "%s picks up key %d", eater->myguy->name,
 					        stats->level);
 				else
-					sprintf(message, "%s picks up key %d", eater->stats->name, stats->level);
+					snprintf(message, sizeof(message), "%s picks up key %d", eater->stats->name, stats->level);
 				if (eater->team_num == 0) // only show players picking up keys
 				{
 					myscreen->do_notify(message, eater);

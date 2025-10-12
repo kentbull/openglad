@@ -36,7 +36,7 @@ short load_saved_game(const char *filename, screen  *myscreen)
 	myscreen->initialize_views();
 
 	// Determine the scenario name to load
-	sprintf(scenfile, "scen%d", myscreen->save_data.scen_num);
+	snprintf(scenfile, sizeof(scenfile), "scen%d", myscreen->save_data.scen_num);
 	
 	// And load the scenario ..
 	myscreen->level_data.id = myscreen->save_data.scen_num;

@@ -1783,25 +1783,25 @@ Sint32 LevelEditorData::display_panel(screen* myscreen)
             {
                 case ORDER_LIVING:
                 case ORDER_GENERATOR:
-                    sprintf(message, "LEVEL: %u", e->level);
+                    snprintf(message, sizeof(message), "LEVEL: %u", e->level);
                     break;
                 case ORDER_TREASURE:
                     if(e->family == FAMILY_GOLD_BAR || e->family == FAMILY_SILVER_BAR)
-                        sprintf(message, "VALUE: %u", e->level);
+                        snprintf(message, sizeof(message), "VALUE: %u", e->level);
                     else if(e->family == FAMILY_KEY)
-                        sprintf(message, "DOOR ID: %u", e->level);
+                        snprintf(message, sizeof(message), "DOOR ID: %u", e->level);
                     else if(e->family == FAMILY_TELEPORTER)
-                        sprintf(message, "GROUP: %u", e->level);
+                        snprintf(message, sizeof(message), "GROUP: %u", e->level);
                     else if(e->family == FAMILY_EXIT)
-                        sprintf(message, "EXIT TO: %u", e->level);
+                        snprintf(message, sizeof(message), "EXIT TO: %u", e->level);
                     else if(e->family != FAMILY_STAIN)
-                        sprintf(message, "POWER: %u", e->level);
+                        snprintf(message, sizeof(message), "POWER: %u", e->level);
                     break;
                 case ORDER_WEAPON:
                     if(e->family == FAMILY_DOOR)
-                        sprintf(message, "DOOR ID: %u", e->level);
+                        snprintf(message, sizeof(message), "DOOR ID: %u", e->level);
                     else
-                        sprintf(message, "POWER: %u", e->level);
+                        snprintf(message, sizeof(message), "POWER: %u", e->level);
                     break;
                 default:
                     break;
@@ -1857,25 +1857,25 @@ Sint32 LevelEditorData::display_panel(screen* myscreen)
         {
             case ORDER_LIVING:
             case ORDER_GENERATOR:
-                sprintf(message, "LEVEL: %u", object_brush.level);
+                snprintf(message, sizeof(message), "LEVEL: %u", object_brush.level);
                 break;
             case ORDER_TREASURE:
                 if(object_brush.family == FAMILY_GOLD_BAR || object_brush.family == FAMILY_SILVER_BAR)
-                    sprintf(message, "VALUE: %u", object_brush.level);
+                    snprintf(message, sizeof(message), "VALUE: %u", object_brush.level);
                 else if(object_brush.family == FAMILY_KEY)
-                    sprintf(message, "DOOR ID: %u", object_brush.level);
+                    snprintf(message, sizeof(message), "DOOR ID: %u", object_brush.level);
                 else if(object_brush.family == FAMILY_TELEPORTER)
-                    sprintf(message, "GROUP: %u", object_brush.level);
+                    snprintf(message, sizeof(message), "GROUP: %u", object_brush.level);
                 else if(object_brush.family == FAMILY_EXIT)
-                    sprintf(message, "EXIT TO: %u", object_brush.level);
+                    snprintf(message, sizeof(message), "EXIT TO: %u", object_brush.level);
                 else if(object_brush.family != FAMILY_STAIN)
-                    sprintf(message, "POWER: %u", object_brush.level);
+                    snprintf(message, sizeof(message), "POWER: %u", object_brush.level);
                 break;
             case ORDER_WEAPON:
                 if(object_brush.family == FAMILY_DOOR)
-                    sprintf(message, "DOOR ID: %u", object_brush.level);
+                    snprintf(message, sizeof(message), "DOOR ID: %u", object_brush.level);
                 else
-                    sprintf(message, "POWER: %u", object_brush.level);
+                    snprintf(message, sizeof(message), "POWER: %u", object_brush.level);
                 break;
             default:
                 break;
@@ -1886,7 +1886,7 @@ Sint32 LevelEditorData::display_panel(screen* myscreen)
         
         numobs = myscreen->level_data.numobs;
         //myscreen->fastbox(lm,L_D(curline),55,7,27, 1);
-        sprintf(message, "OB: %d", numobs);
+        snprintf(message, sizeof(message), "OB: %d", numobs);
         scentext.write_xy(lm,L_D(curline++),message, DARK_BLUE, 1);
     }
     

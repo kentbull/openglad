@@ -106,7 +106,7 @@ short weap::act()
 			// We are randomly walking toward enemy
 		case ACT_RANDOM:
 			{
-				sprintf(message, "Weapon %d doing act random?", family);
+				snprintf(message, sizeof(message), "Weapon %d doing act random?", family);
 				//Log("Weapon doing act_random?\n");
 				myscreen->do_notify(message, this);
 				return 1;

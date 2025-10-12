@@ -209,7 +209,7 @@ typedef gz_header FAR *gz_headerp;
 
                         /* basic functions */
 
-ZEXTERN const char * ZEXPORT zlibVersion OF((void));
+ZEXTERN const char * ZEXPORT zlibVersion(void);
 /* The application can compare zlibVersion and ZLIB_VERSION for consistency.
    If the first character differs, the library code actually used is
    not compatible with the zlib.h header file used by the application.
@@ -239,7 +239,7 @@ ZEXTERN int ZEXPORT deflateInit OF((z_streamp strm, int level));
 */
 
 
-ZEXTERN int ZEXPORT deflate OF((z_streamp strm, int flush));
+ZEXTERN int ZEXPORT deflate(z_streamp strm, int flush);
 /*
     deflate compresses as much data as possible, and stops when the input
   buffer becomes empty or the output buffer becomes full. It may introduce some
@@ -325,7 +325,7 @@ ZEXTERN int ZEXPORT deflate OF((z_streamp strm, int flush));
 */
 
 
-ZEXTERN int ZEXPORT deflateEnd OF((z_streamp strm));
+ZEXTERN int ZEXPORT deflateEnd(z_streamp strm);
 /*
      All dynamically allocated data structures for this stream are freed.
    This function discards any unprocessed input and does not flush any
@@ -360,7 +360,7 @@ ZEXTERN int ZEXPORT inflateInit OF((z_streamp strm));
 */
 
 
-ZEXTERN int ZEXPORT inflate OF((z_streamp strm, int flush));
+ZEXTERN int ZEXPORT inflate(z_streamp strm, int flush);
 /*
     inflate decompresses as much data as possible, and stops when the input
   buffer becomes empty or the output buffer becomes full. It may introduce
@@ -459,7 +459,7 @@ ZEXTERN int ZEXPORT inflate OF((z_streamp strm, int flush));
 */
 
 
-ZEXTERN int ZEXPORT inflateEnd OF((z_streamp strm));
+ZEXTERN int ZEXPORT inflateEnd(z_streamp strm);
 /*
      All dynamically allocated data structures for this stream are freed.
    This function discards any unprocessed input and does not flush any
@@ -535,9 +535,9 @@ ZEXTERN int ZEXPORT deflateInit2 OF((z_streamp strm,
    not perform any compression: this will be done by deflate().
 */
 
-ZEXTERN int ZEXPORT deflateSetDictionary OF((z_streamp strm,
-                                             const Bytef *dictionary,
-                                             uInt  dictLength));
+ZEXTERN int ZEXPORT deflateSetDictionary(z_streamp strm,
+                                         const Bytef *dictionary,
+                                         uInt  dictLength);
 /*
      Initializes the compression dictionary from the given byte sequence
    without producing any compressed output. This function must be called
@@ -574,8 +574,8 @@ ZEXTERN int ZEXPORT deflateSetDictionary OF((z_streamp strm,
    perform any compression: this will be done by deflate().
 */
 
-ZEXTERN int ZEXPORT deflateCopy OF((z_streamp dest,
-                                    z_streamp source));
+ZEXTERN int ZEXPORT deflateCopy(z_streamp dest,
+                                z_streamp source);
 /*
      Sets the destination stream as a complete copy of the source stream.
 
@@ -592,7 +592,7 @@ ZEXTERN int ZEXPORT deflateCopy OF((z_streamp dest,
    destination.
 */
 
-ZEXTERN int ZEXPORT deflateReset OF((z_streamp strm));
+ZEXTERN int ZEXPORT deflateReset(z_streamp strm);
 /*
      This function is equivalent to deflateEnd followed by deflateInit,
    but does not free and reallocate all the internal compression state.
@@ -603,9 +603,9 @@ ZEXTERN int ZEXPORT deflateReset OF((z_streamp strm));
    stream state was inconsistent (such as zalloc or state being NULL).
 */
 
-ZEXTERN int ZEXPORT deflateParams OF((z_streamp strm,
-                                      int level,
-                                      int strategy));
+ZEXTERN int ZEXPORT deflateParams(z_streamp strm,
+                                  int level,
+                                  int strategy);
 /*
      Dynamically update the compression level and compression strategy.  The
    interpretation of level and strategy is as in deflateInit2.  This can be
@@ -1006,8 +1006,8 @@ ZEXTERN uLong ZEXPORT zlibCompileFlags OF((void));
    utility functions can easily be modified if you need special options.
 */
 
-ZEXTERN int ZEXPORT compress OF((Bytef *dest,   uLongf *destLen,
-                                 const Bytef *source, uLong sourceLen));
+ZEXTERN int ZEXPORT compress(Bytef *dest,   uLongf *destLen,
+                                 const Bytef *source, uLong sourceLen);
 /*
      Compresses the source buffer into the destination buffer.  sourceLen is
    the byte length of the source buffer. Upon entry, destLen is the total
@@ -1021,9 +1021,9 @@ ZEXTERN int ZEXPORT compress OF((Bytef *dest,   uLongf *destLen,
    buffer.
 */
 
-ZEXTERN int ZEXPORT compress2 OF((Bytef *dest,   uLongf *destLen,
+ZEXTERN int ZEXPORT compress2(Bytef *dest,   uLongf *destLen,
                                   const Bytef *source, uLong sourceLen,
-                                  int level));
+                                  int level);
 /*
      Compresses the source buffer into the destination buffer. The level
    parameter has the same meaning as in deflateInit.  sourceLen is the byte
@@ -1257,7 +1257,7 @@ ZEXTERN void ZEXPORT gzclearerr OF((gzFile file));
    compression library.
 */
 
-ZEXTERN uLong ZEXPORT adler32 OF((uLong adler, const Bytef *buf, uInt len));
+ZEXTERN uLong ZEXPORT adler32(uLong adler, const Bytef *buf, uInt len);
 /*
      Update a running Adler-32 checksum with the bytes buf[0..len-1] and
    return the updated checksum. If buf is NULL, this function returns
@@ -1273,8 +1273,7 @@ ZEXTERN uLong ZEXPORT adler32 OF((uLong adler, const Bytef *buf, uInt len));
      if (adler != original_adler) error();
 */
 
-ZEXTERN uLong ZEXPORT adler32_combine OF((uLong adler1, uLong adler2,
-                                          z_off_t len2));
+ZEXTERN uLong ZEXPORT adler32_combine(uLong adler1, uLong adler2,z_off_t len2);
 /*
      Combine two Adler-32 checksums into one.  For two sequences of bytes, seq1
    and seq2 with lengths len1 and len2, Adler-32 checksums were calculated for
@@ -1282,7 +1281,7 @@ ZEXTERN uLong ZEXPORT adler32_combine OF((uLong adler1, uLong adler2,
    seq1 and seq2 concatenated, requiring only adler1, adler2, and len2.
 */
 
-ZEXTERN uLong ZEXPORT crc32   OF((uLong crc, const Bytef *buf, uInt len));
+ZEXTERN uLong ZEXPORT crc32(uLong crc, const Bytef *buf, uInt len);
 /*
      Update a running CRC-32 with the bytes buf[0..len-1] and return the
    updated CRC-32. If buf is NULL, this function returns the required initial

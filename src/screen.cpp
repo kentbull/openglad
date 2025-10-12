@@ -697,7 +697,7 @@ short screen::act()
 		{
 			if (!(enemy_freeze%10) && !printed_time)
 			{
-				sprintf(obmessage, "TIME LEFT: %d", enemy_freeze);
+				snprintf(obmessage, sizeof(obmessage), "TIME LEFT: %d", enemy_freeze);
 				viewob[0]->set_display_text(obmessage, 10);
 				printed_time = 1;
 			}
@@ -1386,10 +1386,10 @@ void screen::report_mem()
 	// See two lines up: (plus sounds like a dos thing):  int386x( DPMI_INT, &regs, &regs, &sregs );
 
 	// Them:
-	//sprintf(memreport, "Largest Block: %lu bytes",
+	//snprintf(memreport, sizeof(memreport), "Largest Block: %lu bytes",
 	//  Memory.LargestBlockAvail);
 	//viewob[0]->set_display_text(memreport, STANDARD_TEXT_TIME);
-	sprintf(memreport, "Free Linear address: %u pages",
+	snprintf(memreport, sizeof(memreport), "Free Linear address: %u pages",
 	        Memory.FreeLinAddrSpace);
 	//  Log(memreport);
 	//  Log("\n");

@@ -23,6 +23,7 @@
 #include "input.h"
 #include "graph.h"
 #include "colors.h"
+#include <string.h>
 
 #include "version.h"
 
@@ -454,7 +455,7 @@ short viewscreen::input(const SDL_Event& event)
             totaltime = (query_timer_control() - myscreen->timerstart)/72;
             totalframes = (myscreen->framecount);
             framespersec = totalframes / totaltime;
-            sprintf(somemessage, "%u FRAMES PER SEC", framespersec);
+            snprintf(somemessage, sizeof(somemessage), "%u FRAMES PER SEC", framespersec);
             myscreen->viewob[0]->set_display_text(somemessage, STANDARD_TEXT_TIME);
         }
 
@@ -1334,10 +1335,10 @@ void viewscreen::view_team(short left, short top, short right, short bottom)
 	strcpy (message, "Health");
 	mytext.write_xy(left+80, text_down, message, (unsigned char) BLACK);
 
-	sprintf (message, "Power");
+	snprintf(message, sizeof(message), "Power");
 	mytext.write_xy(left+140, text_down, message, (unsigned char) BLACK);
 
-	sprintf (message, "Level");
+	snprintf(message, sizeof(message), "Level");
 	mytext.write_xy(left+190, text_down, message, (unsigned char) BLACK);
 
 	text_down+=6;
@@ -1350,7 +1351,7 @@ void viewscreen::view_team(short left, short top, short right, short bottom)
 		if (w && !w->dead
 		        && w->query_order() == ORDER_LIVING
 		        && w->team_num == teamnum
-		        && (w->stats->name || w->myguy)) //&& w->owner == NULL)
+		        && (w->stats->name[0] != '\0' || w->myguy)) //&& w->owner == NULL)
 		{
 		    ls.push_back(w);
 		}
@@ -1374,13 +1375,13 @@ void viewscreen::view_team(short left, short top, short right, short bottom)
 			if ( (hp * 3) < maxhp)
 				hpcolor = LOW_HP_COLOR;
 			else if ( (hp * 3 / 2) < maxhp)
-				hpcolor = MID_HP_COLOR -3;
+				hpcolor = (char)MID_HP_COLOR -3;
 			else if (hp < maxhp)
 				hpcolor = MAX_HP_COLOR+4;
 			else if (hp == maxhp)
 				hpcolor = HIGH_HP_COLOR+2;
 			else
-				hpcolor = ORANGE_START;
+				hpcolor = (char)ORANGE_START;
 
 			if ( (mp * 3) < maxmp)
 				mpcolor = LOW_MP_COLOR;
@@ -1391,12 +1392,12 @@ void viewscreen::view_team(short left, short top, short right, short bottom)
 			else if (mp == maxmp)
 				mpcolor = HIGH_MP_COLOR+3;
 			else
-				mpcolor = WATER_START;
+				mpcolor = (char)WATER_START;
 
 			if (w == control)
 				namecolor = RED;
 			else
-				namecolor = BLACK;
+				namecolor = (char)BLACK;
 
 			if (w->myguy)
 				strcpy (message, w->myguy->name);
@@ -1404,13 +1405,13 @@ void viewscreen::view_team(short left, short top, short right, short bottom)
 				strcpy(message, w->stats->name);
 			mytext.write_xy(left+5, text_down, message, (unsigned char) namecolor);
 
-			sprintf (message, "%4.0f/%.0f", ceilf(hp), maxhp);
+			snprintf(message, sizeof(message), "%4.0f/%.0f", ceilf(hp), maxhp);
 			mytext.write_xy(left+70, text_down, message, (unsigned char) hpcolor);
 
-			sprintf (message, "%4.0f/%.0f", ceilf(mp), maxmp);
+			snprintf(message, sizeof(message), "%4.0f/%.0f", ceilf(mp), maxmp);
 			mytext.write_xy(left+130, text_down, message, (unsigned char) mpcolor);
 
-			sprintf (message, "%2d", w->stats->level);
+			snprintf(message, sizeof(message), "%2d", w->stats->level);
 			mytext.write_xy(left+195, text_down, message, (unsigned char) BLACK);
 
 			text_down+=6;
@@ -1460,7 +1461,7 @@ void viewscreen::options_menu()
 
 
 	gamespeed = change_speed(0);
-	sprintf(message, "Change Game Speed (+/-): %2d  ", gamespeed);
+	snprintf(message, sizeof(message), "Change Game Speed (+/-): %2d  ", gamespeed);
 	optiontext.write_xy(LEFT_OPS, OPLINES(2), message, (unsigned char) BLACK, 1);
 	switch (prefs[PREF_VIEW])
 	{
@@ -1483,19 +1484,19 @@ void viewscreen::options_menu()
 			strcpy(tempstr, "Weird");
 			break;
 	}
-	sprintf(message, "Change View Size ([,]) : %s ", tempstr);
+	snprintf(message, sizeof(message), "Change View Size ([,]) : %s ", tempstr);
 	myscreen->draw_box(LEFT_OPS, OPLINES(3), LEFT_OPS+strlen(message)*6, OPLINES(3)+6, PANEL_COLOR, 1, 1);
 	optiontext.write_xy(LEFT_OPS, OPLINES(3), message, (unsigned char) BLACK, 1);
 
 	gamma = change_gamma(0);
-	sprintf(message, "Change Brightness (<,>): %d ", gamma);
+	snprintf(message, sizeof(message), "Change Brightness (<,>): %d ", gamma);
 	myscreen->draw_box(45, OPLINES(4), 275, OPLINES(4)+6, PANEL_COLOR, 1, 1);
 	optiontext.write_xy(LEFT_OPS, OPLINES(4), message, (unsigned char) BLACK, 1);
 
 	if (prefs[PREF_RADAR])
-		sprintf(message, "Radar Display (R)      : ON ");
+		snprintf(message, sizeof(message), "Radar Display (R)      : ON ");
 	else
-		sprintf(message, "Radar Display (R)      : OFF ");
+		snprintf(message, sizeof(message), "Radar Display (R)      : OFF ");
 	myscreen->draw_box(45, OPLINES(5), 275, OPLINES(5)+6, PANEL_COLOR, 1, 1);
 	optiontext.write_xy(LEFT_OPS, OPLINES(5), message, (unsigned char) BLACK, 1);
 
@@ -1518,47 +1519,47 @@ void viewscreen::options_menu()
 			strcpy(tempstr, "On");
 			break;
 	}
-	sprintf(message, "Hitpoint Display (H)   : %s", tempstr);
+	snprintf(message, sizeof(message), "Hitpoint Display (H)   : %s", tempstr);
 	myscreen->draw_box(45, OPLINES(6), 275, OPLINES(6)+6, PANEL_COLOR, 1, 1);
 	optiontext.write_xy(LEFT_OPS, OPLINES(6), message, (unsigned char) BLACK, 1);
 
 	if (prefs[PREF_FOES])
-		sprintf(message, "Foes Display (F)       : ON ");
+		snprintf(message, sizeof(message), "Foes Display (F)       : ON ");
 	else
-		sprintf(message, "Foes Display (F)       : OFF ");
+		snprintf(message, sizeof(message), "Foes Display (F)       : OFF ");
 	myscreen->draw_box(45, OPLINES(7), 275, OPLINES(7)+6, PANEL_COLOR, 1, 1);
 	optiontext.write_xy(LEFT_OPS, OPLINES(7), message, (unsigned char) BLACK, 1);
 
 	if (prefs[PREF_SCORE])
-		sprintf(message, "Score Display (S)      : ON ");
+		snprintf(message, sizeof(message), "Score Display (S)      : ON ");
 	else
-		sprintf(message, "Score Display (S)      : OFF ");
+		snprintf(message, sizeof(message), "Score Display (S)      : OFF ");
 	myscreen->draw_box(45, OPLINES(8), 275, OPLINES(8)+6, PANEL_COLOR, 1, 1);
 	optiontext.write_xy(LEFT_OPS, OPLINES(8), message, (unsigned char) BLACK, 1);
 
 	optiontext.write_xy(LEFT_OPS, OPLINES(9), "VIEW TEAM INFO (T)", (unsigned char) BLACK, 1);
 
 	if (myscreen->cyclemode)
-		sprintf(message,"Color Cycling (C)      : ON ");
+		snprintf(message, sizeof(message),"Color Cycling (C)      : ON ");
 	else
-		sprintf(message,"Color Cycling (C)      : OFF ");
+		snprintf(message, sizeof(message),"Color Cycling (C)      : OFF ");
 	myscreen->draw_box(45,OPLINES(10),275,OPLINES(10)+6,PANEL_COLOR,1,1);
 	optiontext.write_xy(LEFT_OPS,OPLINES(10),message,(unsigned char) BLACK,1);
 
 	//if (prefs[PREF_JOY] == PREF_NO_JOY)
 	if(!playerHasJoystick(mynum))
-		sprintf(message, "Joystick Mode (J)      : OFF ");
+		snprintf(message, sizeof(message), "Joystick Mode (J)      : OFF ");
 	else
-		sprintf(message, "Joystick Mode (J)      : ON ");
+		snprintf(message, sizeof(message), "Joystick Mode (J)      : ON ");
 	myscreen->draw_box(45,OPLINES(11),275,OPLINES(11)+6,PANEL_COLOR,1,1);
 	optiontext.write_xy(LEFT_OPS,OPLINES(11),message,(unsigned char) BLACK,1);
 
 	optiontext.write_xy(LEFT_OPS, OPLINES(12), "EDIT KEY PREFS (K)", (unsigned char) BLACK, 1);
 
 	if (prefs[PREF_OVERLAY])
-		sprintf(message, "Text-button Display (B): ON ");
+		snprintf(message, sizeof(message), "Text-button Display (B): ON ");
 	else
-		sprintf(message, "Text-button Display (B): OFF");
+		snprintf(message, sizeof(message), "Text-button Display (B): OFF");
 	optiontext.write_xy(LEFT_OPS, OPLINES(13), message, BLACK, 1);
 
 	// Draw the current screen
@@ -1571,7 +1572,7 @@ void viewscreen::options_menu()
 		if (keystates[KEYSTATE_KP_PLUS]) // faster game speed
 		{
 			gamespeed = change_speed(1);
-			sprintf(message, "Change Game Speed (+/-): %2d  ", gamespeed);
+			snprintf(message, sizeof(message), "Change Game Speed (+/-): %2d  ", gamespeed);
 			myscreen->draw_box(LEFT_OPS, OPLINES(2), LEFT_OPS+strlen(message)*6, OPLINES(2)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(2), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1581,7 +1582,7 @@ void viewscreen::options_menu()
 		if (keystates[KEYSTATE_KP_MINUS]) // slower game speed
 		{
 			gamespeed = change_speed(-1);
-			sprintf(message, "Change Game Speed (+/-): %2d  ", gamespeed);
+			snprintf(message, sizeof(message), "Change Game Speed (+/-): %2d  ", gamespeed);
 			myscreen->draw_box(LEFT_OPS, OPLINES(2), LEFT_OPS+strlen(message)*6, OPLINES(2)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(2), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1616,7 +1617,7 @@ void viewscreen::options_menu()
 					strcpy(tempstr, "Weird");
 					break;
 			}
-			sprintf(message, "Change View Size ([,]) : %s       ", tempstr);
+			snprintf(message, sizeof(message), "Change View Size ([,]) : %s       ", tempstr);
 			myscreen->draw_box(45, OPLINES(3), 275, OPLINES(3)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(3), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1651,7 +1652,7 @@ void viewscreen::options_menu()
 					strcpy(tempstr, "Weird");
 					break;
 			}
-			sprintf(message, "Change View Size ([,]) : %s  ", tempstr);
+			snprintf(message, sizeof(message), "Change View Size ([,]) : %s  ", tempstr);
 			myscreen->draw_box(45, OPLINES(3), 275, OPLINES(3)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(3), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1661,7 +1662,7 @@ void viewscreen::options_menu()
 		if (keystates[KEYSTATE_COMMA]) // darken screen
 		{
 			prefs[PREF_GAMMA] = gamma = change_gamma(-2);
-			sprintf(message, "Change Brightness (<,>): %d ", gamma);
+			snprintf(message, sizeof(message), "Change Brightness (<,>): %d ", gamma);
 			myscreen->draw_box(45, OPLINES(4), 275, OPLINES(4)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(4), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1671,7 +1672,7 @@ void viewscreen::options_menu()
 		if (keystates[KEYSTATE_PERIOD]) // lighten screen
 		{
 			prefs[PREF_GAMMA] = gamma = change_gamma(+2);
-			sprintf(message, "Change Brightness (<,>): %d ", gamma);
+			snprintf(message, sizeof(message), "Change Brightness (<,>): %d ", gamma);
 			myscreen->draw_box(45, OPLINES(4), 275, OPLINES(4)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(4), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1682,9 +1683,9 @@ void viewscreen::options_menu()
 		{
 			prefs[PREF_RADAR] = (prefs[PREF_RADAR]+1)%2;
 			if (prefs[PREF_RADAR])
-				sprintf(message, "Radar Display (R)      : ON ");
+				snprintf(message, sizeof(message), "Radar Display (R)      : ON ");
 			else
-				sprintf(message, "Radar Display (R)      : OFF ");
+				snprintf(message, sizeof(message), "Radar Display (R)      : OFF ");
 			myscreen->draw_box(45, OPLINES(5), 275, OPLINES(5)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(5), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1713,7 +1714,7 @@ void viewscreen::options_menu()
 					strcpy(tempstr, "On");
 					break;
 			}
-			sprintf(message, "Hitpoint Display (H)   : %s", tempstr);
+			snprintf(message, sizeof(message), "Hitpoint Display (H)   : %s", tempstr);
 			myscreen->draw_box(45, OPLINES(6), 275, OPLINES(6)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(6), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1724,9 +1725,9 @@ void viewscreen::options_menu()
 		{
 			prefs[PREF_FOES] = (prefs[PREF_FOES]+1)%2;
 			if (prefs[PREF_FOES])
-				sprintf(message, "Foes Display (F)       : ON ");
+				snprintf(message, sizeof(message), "Foes Display (F)       : ON ");
 			else
-				sprintf(message, "Foes Display (F)       : OFF ");
+				snprintf(message, sizeof(message), "Foes Display (F)       : OFF ");
 			myscreen->draw_box(45, OPLINES(7), 275, OPLINES(7)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(7), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1737,9 +1738,9 @@ void viewscreen::options_menu()
 		{
 			prefs[PREF_SCORE] = (prefs[PREF_SCORE]+1)%2;
 			if (prefs[PREF_SCORE])
-				sprintf(message, "Score Display (S)      : ON ");
+				snprintf(message, sizeof(message), "Score Display (S)      : ON ");
 			else
-				sprintf(message, "Score Display (S)      : OFF ");
+				snprintf(message, sizeof(message), "Score Display (S)      : OFF ");
 			myscreen->draw_box(45, OPLINES(8), 275, OPLINES(8)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(8), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1761,9 +1762,9 @@ void viewscreen::options_menu()
 			while (keystates[KEYSTATE_c])
 				get_input_events(WAIT);
 			if (myscreen->cyclemode)
-				sprintf(message,"Color Cycling (C)      : ON ");
+				snprintf(message, sizeof(message),"Color Cycling (C)      : ON ");
 			else
-				sprintf(message,"Color Cycling (C)      : OFF ");
+				snprintf(message, sizeof(message),"Color Cycling (C)      : OFF ");
 			myscreen->draw_box(45,OPLINES(10),275,OPLINES(10)+6,PANEL_COLOR,1,1);
 			optiontext.write_xy(LEFT_OPS,OPLINES(10),message,(unsigned char) BLACK,1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1779,9 +1780,9 @@ void viewscreen::options_menu()
 		    
 		    // Update joystick display message
             if(!playerHasJoystick(mynum))
-                sprintf(message, "Joystick Mode (J)      : OFF ");
+                snprintf(message, sizeof(message), "Joystick Mode (J)      : OFF ");
             else
-                sprintf(message, "Joystick Mode (J)      : ON ");
+                snprintf(message, sizeof(message), "Joystick Mode (J)      : ON ");
             myscreen->draw_box(45,OPLINES(11),275,OPLINES(11)+6,PANEL_COLOR,1,1);
             optiontext.write_xy(LEFT_OPS,OPLINES(11),message,(unsigned char) BLACK,1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1805,9 +1806,9 @@ void viewscreen::options_menu()
 		{
 			prefs[PREF_OVERLAY] = (prefs[PREF_OVERLAY]+1)%2;
 			if (prefs[PREF_OVERLAY])
-				sprintf(message, "Text-button Display (B): ON ");
+				snprintf(message, sizeof(message), "Text-button Display (B): ON ");
 			else
-				sprintf(message, "Text-button Display (B): OFF ");
+				snprintf(message, sizeof(message), "Text-button Display (B): OFF ");
 			myscreen->draw_box(45, OPLINES(13), 275, OPLINES(13)+6, PANEL_COLOR, 1, 1);
 			optiontext.write_xy(LEFT_OPS, OPLINES(13), message, (unsigned char) BLACK, 1);
 			myscreen->buffer_to_screen(0, 0, 320, 200);
@@ -1908,7 +1909,8 @@ short options::load(viewscreen *viewp)
 {
 	short prefnum = viewp->mynum;
 	// Yes, we are ACTUALLY COPYING the data
-	if(viewp->prefs != prefs[prefnum])
+	if (strcmp((const char*)viewp->prefs, (const char*)prefs[prefnum]) != 0)
+	// if (strcmp(viewp->prefs, prefs[prefnum]) != 0)
         memcpy(viewp->prefs, prefs[prefnum], 10);
     if(viewp->mykeys != allkeys[prefnum])
         memcpy(viewp->mykeys, allkeys[prefnum], 16 * sizeof(int));

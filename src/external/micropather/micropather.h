@@ -158,9 +158,20 @@ namespace micropather
 					PathNode* _parent );
 
 		void Clear() {
-			memset( this, 0, sizeof( PathNode ) );
+			state = nullptr;
+			costFromStart = 0.0f;
+			estToGoal = 0.0f;
+			totalCost = 0.0f;
+			parent = nullptr;
+			frame = 0;
 			numAdjacent = -1;
-			cacheIndex  = -1;
+			cacheIndex = -1;
+			child[0] = nullptr;
+			child[1] = nullptr;
+			next = nullptr;
+			prev = nullptr;
+			inOpen = false;
+			inClosed = false;
 		}
 		void InitSentinel() {
 			Clear();

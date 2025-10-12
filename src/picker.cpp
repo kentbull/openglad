@@ -454,7 +454,7 @@ void view_team(short left, short top, short right, short bottom)
 	strcpy (message, "STR  DEX  CON  INT  ARM");
 	mytext.write_xy(left+80, text_down, message, (unsigned char) BLACK, 1);
 
-	sprintf (message, "Level");
+	snprintf(message, sizeof(message), "Level");
 	mytext.write_xy(left+230, text_down, message, (unsigned char) BLACK, 1);
 
 	text_down+=6;
@@ -471,13 +471,13 @@ void view_team(short left, short top, short right, short bottom)
 			namecolor = ((ourteam[i]->family +1) << 4) & 255;
 			mytext.write_xy(left+5, text_down, message, (unsigned char)namecolor, 1);
 
-			sprintf (message, "%4d %4d %4d %4d %4d",
+			snprintf(message, sizeof(message), "%4d %4d %4d %4d %4d",
 			         ourteam[i]->strength, ourteam[i]->dexterity,
 			         ourteam[i]->constitution, ourteam[i]->intelligence,
 			         ourteam[i]->armor);
 			mytext.write_xy(left+70, text_down, message, (unsigned char) BLACK, 1);
 
-			sprintf (message, "%2d", ourteam[i]->get_level());
+			snprintf(message, sizeof(message), "%2d", ourteam[i]->get_level());
 			mytext.write_xy(left+235, text_down, message, (unsigned char) BLACK, 1);
 
 			family_name_copy(message, ourteam[i]->family);
@@ -697,18 +697,18 @@ void redraw_mainmenu()
         allbuttons[5]->vdisplay();
     }
 
-    sprintf(message, "Difficulty: %s", difficulty_names[current_difficulty]);
+    snprintf(message, sizeof(message), "Difficulty: %s", difficulty_names[current_difficulty]);
     allbuttons[6]->label = message;
 
     // Show the allied mode
     if (myscreen->save_data.allied_mode)
-        sprintf(message, "PVP: Ally");
+        snprintf(message, sizeof(message), "PVP: Ally");
     else
-        sprintf(message, "PVP: Enemy");
+        snprintf(message, sizeof(message), "PVP: Enemy");
     allbuttons[7]->label = message;
     #else
 
-    sprintf(message, "Difficulty: %s", difficulty_names[current_difficulty]);
+    snprintf(message, sizeof(message), "Difficulty: %s", difficulty_names[current_difficulty]);
     allbuttons[2]->label = message;
     
     #endif
@@ -1339,11 +1339,11 @@ Sint32 create_hire_menu(Sint32 arg1)
         myscreen->draw_button(cost_box, 1);
         myscreen->draw_button_inverted(cost_box_inner);
         
-        sprintf(message, "CASH: %u", myscreen->save_data.m_totalcash[current_team_num]);
+        snprintf(message, sizeof(message), "CASH: %u", myscreen->save_data.m_totalcash[current_team_num]);
         mytext.write_xy(cost_box_content.x, cost_box_content.y, message,(unsigned char) DARK_BLUE, 1);
         current_cost = calculate_hire_cost();
         mytext.write_xy(cost_box_content.x, cost_box_content.y + 10, "COST: ", DARK_BLUE, 1);
-        sprintf(message, "      %u", current_cost );
+        snprintf(message, sizeof(message), "      %u", current_cost );
         if (current_cost > myscreen->save_data.m_totalcash[current_team_num])
             mytext.write_xy(cost_box_content.x + 10, cost_box_content.y + 10, message, STAT_CHANGED, 1);
         else
@@ -1361,7 +1361,7 @@ Sint32 create_hire_menu(Sint32 arg1)
         showcolor = STAT_COLOR;
         
         // Strength
-        sprintf(message, "%d", current_guy->strength);
+        snprintf(message, sizeof(message), "%d", current_guy->strength);
         mytext.write_xy(stat_box_content.x, stat_box_content.y + linesdown*line_height, "STR:",
                          (unsigned char) STAT_COLOR, 1);
         
@@ -1370,7 +1370,7 @@ Sint32 create_hire_menu(Sint32 arg1)
         
         linesdown++;
         // Dexterity
-        sprintf(message, "%d", current_guy->dexterity);
+        snprintf(message, sizeof(message), "%d", current_guy->dexterity);
         mytext.write_xy(stat_box_content.x, stat_box_content.y + linesdown*line_height, "DEX:",
                          (unsigned char) STAT_COLOR, 1);
         
@@ -1379,7 +1379,7 @@ Sint32 create_hire_menu(Sint32 arg1)
 
         linesdown++;
         // Constitution
-        sprintf(message, "%d", current_guy->constitution);
+        snprintf(message, sizeof(message), "%d", current_guy->constitution);
         mytext.write_xy(stat_box_content.x, stat_box_content.y + linesdown*line_height, "CON:",
                          (unsigned char) STAT_COLOR, 1);
         
@@ -1388,7 +1388,7 @@ Sint32 create_hire_menu(Sint32 arg1)
 
         linesdown++;
         // Intelligence
-        sprintf(message, "%d", current_guy->intelligence);
+        snprintf(message, sizeof(message), "%d", current_guy->intelligence);
         mytext.write_xy(stat_box_content.x, stat_box_content.y + linesdown*line_height, "INT:",
                          (unsigned char) STAT_COLOR, 1);
         
@@ -1397,7 +1397,7 @@ Sint32 create_hire_menu(Sint32 arg1)
 
         linesdown++;
         // Armor
-        sprintf(message, "%d", current_guy->armor);
+        snprintf(message, sizeof(message), "%d", current_guy->armor);
         mytext.write_xy(stat_box_content.x, stat_box_content.y + linesdown*line_height, "ARMOR:",
                          (unsigned char) STAT_COLOR, 1);
         
@@ -1592,7 +1592,7 @@ Sint32 create_train_menu(Sint32 arg1)
                    || old_guy->armor < current_guy->armor);
 
         // Strength
-        sprintf(message, "%d", current_guy->strength);
+        snprintf(message, sizeof(message), "%d", current_guy->strength);
         mytext.write_xy(stat_box_content.x, DOWN(linesdown), "  STR:",
                          (unsigned char) STAT_COLOR, 1);
         if (level_increased)
@@ -1604,7 +1604,7 @@ Sint32 create_train_menu(Sint32 arg1)
         mytext.write_xy(stat_box_content.x + STAT_NUM_OFFSET, DOWN(linesdown++), message, showcolor, 1);
 
         // Dexterity
-        sprintf(message, "%d", current_guy->dexterity);
+        snprintf(message, sizeof(message), "%d", current_guy->dexterity);
         mytext.write_xy(stat_box_content.x, DOWN(linesdown), "  DEX:",
                          (unsigned char) STAT_COLOR, 1);
         if (level_increased)
@@ -1616,7 +1616,7 @@ Sint32 create_train_menu(Sint32 arg1)
         mytext.write_xy(stat_box_content.x + STAT_NUM_OFFSET, DOWN(linesdown++), message, showcolor, 1);
 
         // Constitution
-        sprintf(message, "%d", current_guy->constitution);
+        snprintf(message, sizeof(message), "%d", current_guy->constitution);
         mytext.write_xy(stat_box_content.x, DOWN(linesdown), "  CON:",
                          (unsigned char) STAT_COLOR, 1);
         if (level_increased)
@@ -1628,7 +1628,7 @@ Sint32 create_train_menu(Sint32 arg1)
         mytext.write_xy(stat_box_content.x + STAT_NUM_OFFSET, DOWN(linesdown++), message, showcolor, 1);
 
         // Intelligence
-        sprintf(message, "%d", current_guy->intelligence);
+        snprintf(message, sizeof(message), "%d", current_guy->intelligence);
         mytext.write_xy(stat_box_content.x, DOWN(linesdown), "  INT:",
                          (unsigned char) STAT_COLOR, 1);
         if (level_increased)
@@ -1640,7 +1640,7 @@ Sint32 create_train_menu(Sint32 arg1)
         mytext.write_xy(stat_box_content.x + STAT_NUM_OFFSET, DOWN(linesdown++), message, showcolor, 1);
 
         // Armor
-        sprintf(message, "%d", current_guy->armor);
+        snprintf(message, sizeof(message), "%d", current_guy->armor);
         mytext.write_xy(stat_box_content.x, DOWN(linesdown), "ARMOR:",
                          (unsigned char) STAT_COLOR, 1);
         if (level_increased)
@@ -1652,7 +1652,7 @@ Sint32 create_train_menu(Sint32 arg1)
         mytext.write_xy(stat_box_content.x + STAT_NUM_OFFSET, DOWN(linesdown++), message, showcolor, 1);
 
         // Level
-        sprintf(message, "%d", current_guy->get_level());
+        snprintf(message, sizeof(message), "%d", current_guy->get_level());
         mytext.write_xy(stat_box_content.x, DOWN(linesdown), "LEVEL:",
                          (unsigned char) STAT_COLOR, 1);
         if (level_increased)
@@ -1674,24 +1674,24 @@ Sint32 create_train_menu(Sint32 arg1)
 		
 		int derived_offset = 3*STAT_NUM_OFFSET/4;
 		
-        sprintf(message, "Total Kills: %d", current_guy->kills);
+        snprintf(message, sizeof(message), "Total Kills: %d", current_guy->kills);
         mytext.write_xy(180, info_box_content.y + linesdown*line_height, message, DARK_BLUE, 1);
         
         linesdown++;
         if (current_guy->total_hits && current_guy->total_shots) // have we at least hit something? :)
         {
-            sprintf(message, "   Accuracy: %d%% ",
+            snprintf(message, sizeof(message), "   Accuracy: %d%% ",
                     (current_guy->total_hits*100)/current_guy->total_shots);
             mytext.write_xy(180, info_box_content.y + linesdown*line_height, message, DARK_BLUE, 1);
         }
         else // haven't ever hit anyone
         {
-            sprintf(message, "   Accuracy: N/A ");
+            snprintf(message, sizeof(message), "   Accuracy: N/A ");
             mytext.write_xy(180, info_box_content.y + linesdown*line_height, message, DARK_BLUE, 1);
         }
         
         linesdown++;
-        sprintf(message, " EXPERIENCE: %u", current_guy->exp);
+        snprintf(message, sizeof(message), " EXPERIENCE: %u", current_guy->exp);
         mytext.write_xy(180, info_box_content.y + linesdown*line_height, message,(unsigned char) DARK_BLUE, 1);
         
         
@@ -1734,19 +1734,19 @@ Sint32 create_train_menu(Sint32 arg1)
 		myscreen->draw_button_inverted(r2);
         
         linesdown += 0.4f;
-        sprintf(message, "CASH: %u", myscreen->save_data.m_totalcash[current_guy->teamnum]);
+        snprintf(message, sizeof(message), "CASH: %u", myscreen->save_data.m_totalcash[current_guy->teamnum]);
         mytext.write_xy(180, info_box_content.y + linesdown*line_height, message,(unsigned char) DARK_BLUE, 1);
         
         linesdown++;
         mytext.write_xy(180, info_box_content.y + linesdown*line_height, "COST: ", DARK_BLUE, 1);
-        sprintf(message, "      %u", current_cost );
+        snprintf(message, sizeof(message), "      %u", current_cost );
         if (current_cost > myscreen->save_data.m_totalcash[current_guy->teamnum])
             mytext.write_xy(180, info_box_content.y + linesdown*line_height, message, STAT_CHANGED, 1);
         else
             mytext.write_xy(180, info_box_content.y + linesdown*line_height, message, STAT_COLOR, 1);
 
         // Display our team setting ..
-        sprintf(message, "Playing on Team %d", current_guy->teamnum+1);
+        snprintf(message, sizeof(message), "Playing on Team %d", current_guy->teamnum+1);
         allbuttons[18]->label = message;
         allbuttons[18]->vdisplay();
 
@@ -1810,7 +1810,7 @@ Sint32 create_load_menu(Sint32 arg1)
         loadtext.write_xy(135-(strlen(message)*3), 15, message, RED, 1);
         for (i=0; i < 10; i++)
         {
-            sprintf(temp_filename, "save%d", i+1);
+            snprintf(temp_filename, sizeof(temp_filename), "save%d", i+1);
             allbuttons[i]->label = get_saved_name(temp_filename);
             myscreen->draw_text_bar(23, 23+i*BUTTON_HEIGHT, 246, 36+BUTTON_HEIGHT*i);
             allbuttons[i]->vdisplay();
@@ -2199,7 +2199,7 @@ Sint32 create_save_menu(Sint32 arg1)
         savetext.write_xy(135-(strlen(message)*3), 15, message, RED, 1);
         for (i=0; i < 10; i++)
         {
-            sprintf(temp_filename, "save%d", i+1);
+            snprintf(temp_filename, sizeof(temp_filename), "save%d", i+1);
             allbuttons[i]->label = get_saved_name(temp_filename);
             myscreen->draw_text_bar(23, 23+i*BUTTON_HEIGHT, 246, 36+BUTTON_HEIGHT*i);
             allbuttons[i]->vdisplay();
@@ -3359,7 +3359,7 @@ Sint32 create_detail_menu(guy *arg1)
        switch (thisguy->family)
        {
            case FAMILY_SOLDIER:
-               sprintf(message, "Level %d soldier has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d soldier has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things (charge)
@@ -3393,7 +3393,7 @@ Sint32 create_detail_menu(guy *arg1)
                }
                break;
            case FAMILY_BARBARIAN:
-               sprintf(message, "Level %d barbarian has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d barbarian has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things (hurl boulder)
@@ -3411,7 +3411,7 @@ Sint32 create_detail_menu(guy *arg1)
                }
                break;
            case FAMILY_ELF:
-               sprintf(message, "Level %d elf has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d elf has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things (rocks)
@@ -3446,7 +3446,7 @@ Sint32 create_detail_menu(guy *arg1)
                }
                break;
            case FAMILY_ARCHER:
-               sprintf(message, "Level %d archer has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d archer has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things
@@ -3481,7 +3481,7 @@ Sint32 create_detail_menu(guy *arg1)
                }
                break;
            case FAMILY_MAGE:
-               sprintf(message, "Level %d Mage has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d Mage has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things
@@ -3501,7 +3501,7 @@ Sint32 create_detail_menu(guy *arg1)
                // Can we change to archmage?
                if (thisguy->get_level() >= 6)
                {
-                   sprintf(message,"Level %d Archmage. This",
+                   snprintf(message, sizeof(message),"Level %d Archmage. This",
                            (thisguy->get_level()-6)/2+1);
                    myscreen->draw_dialog(158, 4, 315, 66, "Become ArchMage");
                    WR(-10,"Your Mage is now of high");
@@ -3537,7 +3537,7 @@ Sint32 create_detail_menu(guy *arg1)
                }
                break;
            case FAMILY_ARCHMAGE:
-               sprintf(message, "Level %d ArchMage has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d ArchMage has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things
@@ -3574,7 +3574,7 @@ Sint32 create_detail_menu(guy *arg1)
                break;
 
            case FAMILY_CLERIC:
-               sprintf(message, "Level %d Cleric has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d Cleric has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things
@@ -3613,7 +3613,7 @@ Sint32 create_detail_menu(guy *arg1)
                }
                break;
            case FAMILY_DRUID:
-               sprintf(message, "Level %d Druid has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d Druid has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things
@@ -3650,7 +3650,7 @@ Sint32 create_detail_menu(guy *arg1)
                }
                break;
            case FAMILY_THIEF:
-               sprintf(message, "Level %d Thief has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d Thief has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things
@@ -3687,7 +3687,7 @@ Sint32 create_detail_menu(guy *arg1)
                }
                break;
            case FAMILY_ORC:
-               sprintf(message, "Level %d Orc has:", thisguy->get_level());
+               snprintf(message, sizeof(message), "Level %d Orc has:", thisguy->get_level());
                mytext.write_xy(DETAIL_LM+1, DETAIL_LD(0)+1, message, 10, 1);
                mytext.write_xy(DETAIL_LM, DETAIL_LD(0), message, DARK_BLUE, 1);
                // Level 1 things
@@ -3826,7 +3826,7 @@ Sint32 set_difficulty()
    char message[80];
 
    current_difficulty = (current_difficulty + 1) % DIFFICULTY_SETTINGS;
-   sprintf(message, "Difficulty: %s", difficulty_names[current_difficulty]);
+   snprintf(message, sizeof(message), "Difficulty: %s", difficulty_names[current_difficulty]);
    #ifndef DISABLE_MULTIPLAYER
    allbuttons[6]->label = message;
    #else
@@ -3859,7 +3859,7 @@ Sint32 change_teamnum(Sint32 arg)
    current_guy->teamnum = current_team;
 
    // Update our button display
-   sprintf(message, "Playing on Team %d", current_team + 1);
+   snprintf(message, sizeof(message), "Playing on Team %d", current_team + 1);
 
    allbuttons[18]->label = message;
    //allbuttons[18]->do_outline = 1;
@@ -3884,7 +3884,7 @@ Sint32 change_hire_teamnum(Sint32 arg)
    }
 
    // Update our button display
-   sprintf(message, "Hiring for Team %d", current_team_num + 1);
+   snprintf(message, sizeof(message), "Hiring for Team %d", current_team_num + 1);
 
    allbuttons[2]->label = message;
 
@@ -3900,9 +3900,9 @@ Sint32 change_allied()
    myscreen->save_data.allied_mode %= 2;
 
    if (myscreen->save_data.allied_mode)
-       sprintf(message, "PVP: Ally");
+       snprintf(message, sizeof(message), "PVP: Ally");
    else
-       sprintf(message, "PVP: Enemy");
+       snprintf(message, sizeof(message), "PVP: Enemy");
 
    // Update our button display
    allbuttons[7]->label = message;

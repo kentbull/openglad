@@ -345,7 +345,7 @@ short effect::act()
 				owner->weapons_left++;
 				//if (owner->user != -1)
 				//{
-				//  sprintf(message, "Knives now %d", owner->weapons_left);
+				//  snprintf(message, sizeof(message), "Knives now %d", owner->weapons_left);
 				//  myscreen->do_notify(message, owner);
 				//}
 				ani_type = ANI_WALK;

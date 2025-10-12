@@ -76,7 +76,7 @@ bool Yam::open_input_file(const char* filename)
 
 void Yam::close_input()
 {
-    if(&_parser.read_handler != NULL)
+    if (_parser.read_handler != NULL)
         yaml_parser_delete(&_parser);
     
     clear_event();

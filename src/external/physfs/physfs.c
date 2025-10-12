@@ -627,7 +627,7 @@ static char *calculateUserDir(void)
         if (retval == NULL)
             __PHYSFS_setError(ERR_OUT_OF_MEMORY);
         else
-            sprintf(retval, "%susers%s%s", baseDir, dirsep, str);
+            snprintf(retval, sizeof(retval), "%susers%s%s", baseDir, dirsep, str);
 
         allocator.Free((void *) uname);
     } /* else */
@@ -1069,7 +1069,7 @@ static void setSaneCfgAddPath(const char *i, const size_t l, const char *dirsep,
     char *str = (char *) __PHYSFS_smallAlloc(allocsize);
     if (str != NULL)
     {
-        sprintf(str, "%s%s%s", d, dirsep, i);
+        snprintf(str, sizeof(str), "%s%s%s", d, dirsep, i);
         PHYSFS_addToSearchPath(str, archivesFirst == 0);
         __PHYSFS_smallFree(str);
     } /* if */
@@ -1095,16 +1095,16 @@ int PHYSFS_setSaneConfig(const char *organization, const char *appName,
     str = (char *) __PHYSFS_smallAlloc(len);
 
     BAIL_IF_MACRO(str == NULL, ERR_OUT_OF_MEMORY, 0);
-    sprintf(str, "%s.%s%s%s", userdir, organization, dirsep, appName);
+    snprintf(str, sizeof(str), "%s.%s%s%s", userdir, organization, dirsep, appName);
 
     if (!PHYSFS_setWriteDir(str))
     {
         int no_write = 0;
-        sprintf(str, ".%s/%s", organization, appName);
+        snprintf(str, sizeof(str), ".%s/%s", organization, appName);
         if ( (PHYSFS_setWriteDir(userdir)) &&
              (PHYSFS_mkdir(str)) )
         {
-            sprintf(str, "%s.%s%s%s", userdir, organization, dirsep, appName);
+            snprintf(str, sizeof(str), "%s.%s%s%s", userdir, organization, dirsep, appName);
             if (!PHYSFS_setWriteDir(str))
                 no_write = 1;
         } /* if */

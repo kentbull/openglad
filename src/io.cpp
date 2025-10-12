@@ -115,36 +115,6 @@ std::string get_user_path()
 #endif
 }
 
-// std::string get_asset_path()
-// {
-// #ifdef ANDROID
-//     // RWops will look in the app's assets directory for this path
-//     return "";
-// #elif defined(__IPHONEOS__)
-//     // Assuming the cwd is set to the program's installation directory
-//     return "";
-// #elif defined(WIN32)
-//     // Assuming the cwd is set to the program's installation directory
-//     return "";
-// #else
-//     // Assumes UNIX with /proc
-//     char path[512];
-//     int maxPathSize = 512;
-//     memset(path, 0, maxPathSize);
-//     readlink("/proc/self/exe", path, maxPathSize);
-//     path[maxPathSize-1] = '\0';
-//     std::string s = path;
-//     size_t slash = s.find_last_of('/');
-//     if(slash != std::string::npos)
-//     {
-//         s = s.substr(0, slash);
-//     }
-//     s += '/';
-
-//     printf("get_asset_path: %s\n", s.c_str());
-//     return s;
-// #endif
-// }
 std::string get_asset_path()
 {
 #ifdef ANDROID

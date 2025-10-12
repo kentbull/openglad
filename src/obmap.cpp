@@ -302,7 +302,7 @@ short ob_pass_check(short x, short y, walker  *ob, const std::list<walker*>& pil
                             // Do we notify?
                             if (!(ob->skip_exit) && (ob->user != -1))
                             {
-                                sprintf(message, "Key %d needed!",
+                                snprintf(message, sizeof(message), "Key %d needed!",
                                         w->stats->level);
                                 myscreen->do_notify(message, ob);
                                 ob->skip_exit = 10;

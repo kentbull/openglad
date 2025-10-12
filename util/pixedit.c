@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 		if (redopicture)
 		{
 			char buffer[60];
-			sprintf(buffer, "Frame %i at %ix", frame, mult);
+			snprintf(buffer, sizeof(buffer), "Frame %i at %ix", frame, mult);
 
 			SDL_WM_SetCaption(buffer, NULL);
 			

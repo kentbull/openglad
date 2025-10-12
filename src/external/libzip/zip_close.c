@@ -600,14 +600,14 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
             _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
             return NULL;
         }
-        sprintf(temp, "%s/.zip.XXXXXX", za->tempdir);
+        snprintf(temp, sizeof(temp), "%s/.zip.XXXXXX", za->tempdir);
     }
     else {
         if ((temp=(char *)malloc(strlen(za->zn)+8)) == NULL) {
             _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
             return NULL;
         }
-        sprintf(temp, "%s.XXXXXX", za->zn);
+        snprintf(temp, sizeof(temp), "%s.XXXXXX", za->zn);
     }
 
     if ((tfd=mkstemp(temp)) == -1) {
