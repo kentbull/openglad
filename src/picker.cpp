@@ -123,6 +123,24 @@ char difficulty_names[DIFFICULTY_SETTINGS][80] =
         "Slaughter",
     };  // end of difficulty names
 
+// cheat for increased money
+// --- Cheat utility: add cash to current team (Train menu) ---
+static inline void cheat_add_cash_current_team(uint32_t amount)
+{
+    // current_guy should be the one selected in the Train menu
+    guy* g = current_guy;
+    if (!g) return;
+
+    const int team = g->teamnum;
+    uint32_t &cash = myscreen->save_data.m_totalcash[team];
+
+    // Optional: cap to avoid overflow or ridiculous totals
+    constexpr uint32_t MAX_CASH = 1000000000u;
+    if (cash > MAX_CASH - amount) cash = MAX_CASH; else cash += amount;
+
+    cash += amount;
+}    
+
 void picker_main(Sint32 argc, char  **argv)
 {
 	Sint32 i;
@@ -1555,6 +1573,24 @@ Sint32 create_train_menu(Sint32 arg1)
                 here = ourteam[editguy];
             current_cost = calculate_train_cost(here);
             retvalue = 0;
+        }
+
+        // ------------------ "+" cash cheat ------------------
+        // Once per event loop tick while key is down.
+        {
+            const Uint8* ks = SDL_GetKeyboardState(nullptr);
+            const SDL_Keymod mods = SDL_GetModState();
+
+            // Top-row "+" on Mac = EQUALS with SHIFT, keypad "+" = KP_PLUS.
+            const bool plusHeld =
+                (ks[SDL_SCANCODE_KP_PLUS] != 0) ||
+                ((ks[SDL_SCANCODE_EQUALS] != 0) && (mods & KMOD_SHIFT));
+
+            // If you want to require Ctrl, add: && (mods & KMOD_CTRL)
+            if (plusHeld) {
+                cheat_add_cash_current_team(100000);
+                // no need to set retvalue; the screen redraws each loop
+            }
         }
 		
         //current_cost = calculate_train_cost(here);
